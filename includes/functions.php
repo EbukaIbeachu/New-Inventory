@@ -1,4 +1,15 @@
 <?php
+// Harden session settings before starting the session
+if (php_sapi_name() !== 'cli') {
+    @ini_set('session.cookie_httponly', '1');
+    @ini_set('session.use_strict_mode', '1');
+    // Lax helps protect against CSRF on cross-site navigations while preserving typical app flows
+    @ini_set('session.cookie_samesite', 'Lax');
+    // Only set Secure flag when served over HTTPS
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        @ini_set('session.cookie_secure', '1');
+    }
+}
 session_start();
 
 function clean_input($data) {

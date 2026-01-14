@@ -1,5 +1,37 @@
 <?php
 require_once 'config/config.php';
+require_once 'includes/functions.php';
+require_once 'config/db.php';
+
+// Lock installer after setup: if the users table exists and has rows, require admin
+$installed = false;
+$hasUsers = false;
+try {
+    // Ensure we are using the app database if it exists
+    if (defined('DB_NAME') && DB_NAME) {
+        $pdo->exec("USE " . DB_NAME);
+    }
+    // Check if users table exists
+    $check = $pdo->query("SHOW TABLES LIKE 'users'");
+    if ($check && $check->rowCount() > 0) {
+        $installed = true;
+        // Check if any user exists (post-install state)
+        $count = $pdo->query("SELECT COUNT(*) FROM users");
+        if ($count) {
+            $hasUsers = (int)$count->fetchColumn() > 0;
+        }
+    }
+} catch (Exception $e) {
+    // If DB doesn't exist yet, installation can proceed
+}
+
+if ($installed && $hasUsers) {
+    // Only admins can access installer after setup
+    if (!is_logged_in() || !is_admin()) {
+        http_response_code(403);
+        die('Installer is locked. Admin access only.');
+    }
+}
 
 $message = '';
 

@@ -2,18 +2,17 @@
 // This script should be run via system cron every minute
 // e.g. * * * * * php /path/to/inventory/cron.php
 
-// Define ROOT_PATH manually if run from CLI
-if (php_sapi_name() === 'cli') {
-    define('ROOT_PATH', __DIR__ . '/');
-} else {
-    // Prevent direct web access for security, or use a secret key
-    if (!isset($_GET['key']) || $_GET['key'] !== 'secret_cron_key') {
-        die("Access Denied");
-    }
-    define('ROOT_PATH', __DIR__ . '/');
-}
+// Define ROOT_PATH early for consistent includes
+define('ROOT_PATH', __DIR__ . '/');
 
 require_once ROOT_PATH . 'config/config.php';
+
+// If accessed via web, require the correct cron secret key
+if (php_sapi_name() !== 'cli') {
+    if (!isset($_GET['key']) || $_GET['key'] !== CRON_SECRET) {
+        die("Access Denied");
+    }
+}
 require_once ROOT_PATH . 'config/db.php';
 require_once ROOT_PATH . 'includes/mailer.php';
 require_once ROOT_PATH . 'includes/CronHelper.php';

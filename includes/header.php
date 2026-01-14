@@ -3,6 +3,12 @@ if (!defined('APP_NAME')) {
     // Prevent direct access if config not loaded (though usually this file is included after config)
     require_once dirname(__DIR__) . '/config/config.php';
 }
+// Security headers
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: no-referrer');
+    header('X-Frame-Options: DENY');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

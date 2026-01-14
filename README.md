@@ -31,6 +31,30 @@ A comprehensive web-based system for managing inventory, receipts, and users wit
 - **Database**: Edit `config/config.php` if you need to change DB credentials manually.
 - **Email**: Edit `includes/mailer.php` to configure SMTP settings (currently logs to `uploads/email_log.txt`).
 
+### Environment Variables (recommended)
+You can configure secrets via environment variables without changing code. If not set, the app uses the current defaults.
+
+- `DB_HOST` (default: `localhost`)
+- `DB_NAME` (default: `inventory_system`)
+- `DB_USER` (default: `root`)
+- `DB_PASS` (default: empty)
+- `CRON_SECRET` (default: `secret_cron_key`)
+
+On Windows (EasyPHP/Apache):
+1. Open “Edit the system environment variables” → Environment Variables.
+2. Under “User variables” (or System), click New and add the above keys.
+3. Restart Apache/MySQL from EasyPHP for changes to take effect.
+
+Alternatively, in Apache httpd.conf or a vhost:
+```
+SetEnv DB_HOST localhost
+SetEnv DB_NAME inventory_system
+SetEnv DB_USER root
+SetEnv DB_PASS ""
+SetEnv CRON_SECRET secret_cron_key
+```
+Then restart Apache.
+
 ## Usage
 
 - **Login**: Use the default admin credentials to log in.

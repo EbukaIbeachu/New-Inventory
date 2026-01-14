@@ -1,0 +1,16 @@
+# Ignore runtime/storage directories
+
+# Uploads: keep .htaccess or .gitkeep if present
+/uploads/*
+!/uploads/.htaccess
+!/uploads/.gitkeep
+
+# Backups: optional folder for dumps
+/backups/*
+!/backups/.gitkeep
+!/backups/.htaccess
+
+# Logs: if you create a logs/ folder later
+/logs/*
+!/logs/.gitkeep
+!/logs/.htaccess

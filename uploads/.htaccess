@@ -1,0 +1,13 @@
+# Harden uploads directory
+# 1) No directory browsing
+Options -Indexes -ExecCGI
+
+# 2) Never execute scripts from uploads
+<FilesMatch "\.(php|phtml|php[0-9]?|phar|cgi|pl|py|asp|aspx)$">
+  Require all denied
+</FilesMatch>
+
+# 3) Block access to logs and dotfiles
+<FilesMatch "^(php_error\.log|\.|.*\.log|.*\.ini|.*\.env)$">
+  Require all denied
+</FilesMatch>

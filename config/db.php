@@ -17,9 +17,11 @@ try {
             $dsn_no_db = "mysql:host=" . DB_HOST . ";charset=utf8mb4";
             $pdo = new PDO($dsn_no_db, DB_USER, DB_PASS, $options);
         } catch (\PDOException $e2) {
-            die("Database connection failed: " . $e2->getMessage());
+            error_log('DB connect (no DB) failed: ' . $e2->getMessage());
+            die("Database connection error. Please try again later.");
         }
     } else {
-        die("Database connection failed: " . $e->getMessage());
+        error_log('DB connect failed: ' . $e->getMessage());
+        die("Database connection error. Please try again later.");
     }
 }
