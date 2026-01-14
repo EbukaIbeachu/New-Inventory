@@ -36,15 +36,25 @@ if ($is_print) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
         <style>
-            body { padding: 20px; }
+            body { padding: 20px; font-size: 12pt; }
+            .doc-header h2 { margin-bottom: .25rem; }
+            .doc-header p { margin: 0; color: #6c757d; }
+            .table th, .table td { vertical-align: middle; }
+            .totals-row th { background: #f8f9fa; }
             @media print {
-                .no-print { display: none; }
+                .no-print { display: none !important; }
+                @page { margin: 12mm; }
+                body { padding: 0; }
+                thead { display: table-header-group; }
+                tfoot { display: table-footer-group; }
+                table { page-break-inside: auto; }
+                tr, td, th { page-break-inside: avoid; page-break-after: auto; }
             }
         </style>
     </head>
     <body onload="window.print()">
         <div class="container">
-            <div class="row mb-4">
+            <div class="row mb-4 doc-header">
                 <div class="col-6">
                     <h2><?php echo APP_NAME; ?></h2>
                     <p>Address Line 1<br>City, Country<br>Email: support@example.com</p>
@@ -84,15 +94,15 @@ if ($is_print) {
                         <td><?php echo htmlspecialchars($item['name']); ?></td>
                         <td><?php echo htmlspecialchars($item['sku']); ?></td>
                         <td><?php echo $item['quantity']; ?></td>
-                        <td><?php echo number_format($item['unit_price'], 2); ?></td>
-                        <td><?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?></td>
+                        <td>₦<?php echo number_format($item['unit_price'], 2); ?></td>
+                        <td>₦<?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="4" class="text-end">Grand Total</th>
-                        <th><?php echo number_format($receipt['total_amount'], 2); ?></th>
+                        <th colspan="4" class="text-end totals-row">Grand Total</th>
+                        <th class="totals-row">₦<?php echo number_format($receipt['total_amount'], 2); ?></th>
                     </tr>
                 </tfoot>
             </table>
@@ -143,7 +153,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         
-        <table class="table table-bordered">
+        <table class="table table-hover table-compact table-bordered">
             <thead>
                 <tr>
                     <th>Item</th>

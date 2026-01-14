@@ -3,7 +3,7 @@ require_once 'config/config.php';
 require_once 'config/db.php';
 require_once 'includes/functions.php';
 
-require_login();
+require_admin();
 
 $page_title = 'Add Inventory Item';
 $error = '';
@@ -68,11 +68,14 @@ include 'includes/header.php';
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Item Name</label>
-                    <input type="text" name="name" class="form-control" required>
+                    <input type="text" name="name" class="form-control" data-validate="required" required>
+                    <div class="invalid-feedback">This field is required.</div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">SKU (Stock Keeping Unit)</label>
-                    <input type="text" name="sku" class="form-control" required>
+                    <input type="text" name="sku" class="form-control" data-validate="required" required>
+                    <div class="form-text">Unique code used to identify the item.</div>
+                    <div class="invalid-feedback">This field is required.</div>
                 </div>
             </div>
             
@@ -83,11 +86,17 @@ include 'includes/header.php';
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Quantity</label>
-                    <input type="number" name="quantity" class="form-control" value="0" min="0">
+                    <input type="number" name="quantity" class="form-control" value="0" min="0" data-validate="required">
+                    <div class="invalid-feedback">Please enter a valid quantity.</div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Unit Price</label>
-                    <input type="number" name="unit_price" class="form-control" step="0.01" value="0.00">
+                    <div class="input-group">
+                        <span class="input-group-text">₦</span>
+                        <input type="text" name="unit_price" class="form-control money" value="0.00" inputmode="decimal" placeholder="0.00" data-validate="required">
+                    </div>
+                    <div class="form-text">Enter amount in Naira (e.g., 12,500.00).</div>
+                    <div class="invalid-feedback">Please enter a valid amount.</div>
                 </div>
             </div>
             

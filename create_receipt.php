@@ -110,7 +110,7 @@ include 'includes/header.php';
             </div>
             
             <h4 class="mt-4 mb-3">Items</h4>
-            <table class="table table-bordered" id="itemsTable">
+            <table class="table table-bordered table-compact" id="itemsTable">
                 <thead>
                     <tr>
                         <th>Item</th>
@@ -133,13 +133,18 @@ include 'includes/header.php';
                             </select>
                         </td>
                         <td>
-                            <input type="number" name="quantities[]" class="form-control qty-input" min="1" value="1" onchange="calculateRowTotal(this)" required>
+                            <input type="number" name="quantities[]" class="form-control qty-input" min="1" value="1" onchange="calculateRowTotal(this)" required data-validate="required">
+                            <div class="invalid-feedback">Enter quantity.</div>
                         </td>
                         <td>
-                            <input type="number" name="prices[]" class="form-control price-input" step="0.01" onchange="calculateRowTotal(this)" required>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="text" name="prices[]" class="form-control price-input money" inputmode="decimal" placeholder="0.00" onchange="calculateRowTotal(this)" required data-validate="required">
+                            </div>
+                            <div class="invalid-feedback">Enter price.</div>
                         </td>
                         <td>
-                            <input type="text" class="form-control row-total" readonly>
+                            <input type="text" class="form-control row-total" readonly placeholder="₦0.00">
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="fas fa-trash"></i></button>
@@ -157,7 +162,7 @@ include 'includes/header.php';
                     <table class="table table-bordered">
                         <tr>
                             <th>Grand Total</th>
-                            <td><strong id="grandTotal">0.00</strong></td>
+                            <td><strong id="grandTotal">₦0.00</strong></td>
                         </tr>
                     </table>
                 </div>
@@ -181,24 +186,26 @@ function updatePrice(select) {
 function calculateRowTotal(element) {
     var row = $(element).closest('tr');
     var qty = parseFloat(row.find('.qty-input').val()) || 0;
-    var price = parseFloat(row.find('.price-input').val()) || 0;
+    var price = parseFloat((row.find('.price-input').val() || '').toString().replace(/,/g, '')) || 0;
     var total = qty * price;
-    row.find('.row-total').val(total.toFixed(2));
+    row.find('.row-total').val('₦' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
     calculateGrandTotal();
 }
 
 function calculateGrandTotal() {
     var total = 0;
     $('.row-total').each(function() {
-        total += parseFloat($(this).val()) || 0;
+        var v = ($(this).val() || '').toString().replace(/₦/g, '').replace(/,/g, '');
+        total += parseFloat(v) || 0;
     });
-    $('#grandTotal').text(total.toFixed(2));
+    $('#grandTotal').text('₦' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
 }
 
 function addRow() {
     var row = $('#itemsTable tbody tr:first').clone();
     row.find('input').val('');
     row.find('.qty-input').val(1);
+    row.find('.row-total').val('₦0.00');
     $('#itemsTable tbody').append(row);
 }
 

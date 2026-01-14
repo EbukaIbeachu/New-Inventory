@@ -79,11 +79,14 @@ include 'includes/header.php';
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Item Name</label>
-                    <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($item['name']); ?>" required>
+                    <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($item['name']); ?>" data-validate="required" required>
+                    <div class="invalid-feedback">This field is required.</div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">SKU</label>
-                    <input type="text" name="sku" class="form-control" value="<?php echo htmlspecialchars($item['sku']); ?>" required>
+                    <input type="text" name="sku" class="form-control" value="<?php echo htmlspecialchars($item['sku']); ?>" data-validate="required" required>
+                    <div class="form-text">Unique code used to identify the item.</div>
+                    <div class="invalid-feedback">This field is required.</div>
                 </div>
             </div>
             
@@ -94,11 +97,17 @@ include 'includes/header.php';
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Quantity</label>
-                    <input type="number" name="quantity" class="form-control" value="<?php echo $item['quantity']; ?>" min="0">
+                    <input type="number" name="quantity" class="form-control" value="<?php echo $item['quantity']; ?>" min="0" data-validate="required">
+                    <div class="invalid-feedback">Please enter a valid quantity.</div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Unit Price</label>
-                    <input type="number" name="unit_price" class="form-control" step="0.01" value="<?php echo $item['unit_price']; ?>">
+                    <div class="input-group">
+                        <span class="input-group-text">₦</span>
+                        <input type="text" name="unit_price" class="form-control money" value="<?php echo number_format($item['unit_price'], 2); ?>" inputmode="decimal" placeholder="0.00" data-validate="required">
+                    </div>
+                    <div class="form-text">Enter amount in Naira (e.g., 12,500.00).</div>
+                    <div class="invalid-feedback">Please enter a valid amount.</div>
                 </div>
             </div>
             

@@ -11,6 +11,54 @@
     transition: margin .25s ease-out;
 }
 
+# KPI cards and trends
+.kpi-trend {
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+}
+.kpi-trend .trend-up { color: #198754; }
+.kpi-trend .trend-down { color: #dc3545; }
+.kpi-trend .trend-flat { color: #6c757d; }
+
+/* Tables: compact density, sticky header, row-hover actions */
+.table-compact > :not(caption) > * > * {
+    padding: .35rem .5rem;
+}
+.table-sticky {
+    max-height: 420px;
+    overflow: auto;
+}
+.table-sticky thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fff;
+}
+/* Show inline row actions on hover */
+table .row-actions { opacity: 0; transition: opacity .15s ease-in-out; white-space: nowrap; }
+table tbody tr:hover .row-actions { opacity: 1; }
+
+/* Status badges */
+.badge-approved { background-color: #198754 !important; }
+.badge-pending { background-color: #ffc107 !important; color: #212529 !important; }
+.badge-rejected { background-color: #dc3545 !important; }
+.badge-paid { background-color: #198754 !important; }
+.badge-unpaid { background-color: #0d6efd !important; }
+.badge-overdue { background-color: #dc3545 !important; }
+
+/* Print styles for receipts */
+@media print {
+    .no-print { display: none !important; }
+    .print-container { padding: 10mm; }
+    @page { margin: 12mm; }
+    table { page-break-inside: auto; }
+    tr, td, th { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+}
+
 #sidebar-wrapper .sidebar-heading {
     padding: 0.875rem 1.25rem;
     font-size: 1.2rem;

@@ -12,7 +12,9 @@ include 'includes/header.php';
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Inventory Management</h2>
     <div>
-        <a href="add_item.php" class="btn btn-primary"><i class="fas fa-plus"></i> Add Item</a>
+        <?php if (is_admin()): ?>
+            <a href="add_item.php" class="btn btn-primary"><i class="fas fa-plus"></i> Add Item</a>
+        <?php endif; ?>
         <a href="import_export.php" class="btn btn-success"><i class="fas fa-file-csv"></i> Import/Export</a>
     </div>
 </div>

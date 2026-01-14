@@ -18,8 +18,17 @@ $stmt = $pdo->query("SELECT COUNT(*) FROM inventory WHERE quantity <= low_stock_
 $low_stock_count = $stmt->fetchColumn();
 
 // 3. Recent Receipts
+// Current 30 days
 $stmt = $pdo->query("SELECT COUNT(*) FROM receipts WHERE receipt_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
 $monthly_receipts = $stmt->fetchColumn();
+// Previous 30 days
+$stmt = $pdo->query("SELECT COUNT(*) FROM receipts WHERE receipt_date < DATE_SUB(NOW(), INTERVAL 30 DAY) AND receipt_date >= DATE_SUB(NOW(), INTERVAL 60 DAY)");
+$prev_monthly_receipts = $stmt->fetchColumn();
+// Trend calculation
+$receipts_trend = 0;
+if ($prev_monthly_receipts > 0) {
+    $receipts_trend = (($monthly_receipts - $prev_monthly_receipts) / $prev_monthly_receipts) * 100;
+}
 
 // 4. Pending Users (Admin only)
 $pending_users = 0;
@@ -67,6 +76,17 @@ if (is_admin()) {
                     <div>
                         <div class="h6">Receipts (30 Days)</div>
                         <div class="h3 mb-0"><?php echo $monthly_receipts; ?></div>
+                        <div class="kpi-trend mt-1">
+                            <?php if ($prev_monthly_receipts == 0 && $monthly_receipts > 0): ?>
+                                <span class="trend-up"><i class="fas fa-arrow-up"></i> New</span>
+                            <?php elseif ($receipts_trend > 0): ?>
+                                <span class="trend-up"><i class="fas fa-arrow-up"></i> <?php echo number_format($receipts_trend, 0); ?>%</span>
+                            <?php elseif ($receipts_trend < 0): ?>
+                                <span class="trend-down"><i class="fas fa-arrow-down"></i> <?php echo number_format(abs($receipts_trend), 0); ?>%</span>
+                            <?php else: ?>
+                                <span class="trend-flat"><i class="fas fa-minus"></i> 0%</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <i class="fas fa-receipt fa-2x opacity-50"></i>
                 </div>
@@ -93,6 +113,30 @@ if (is_admin()) {
     <?php endif; ?>
 </div>
 
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+    <?php if (is_admin()): ?>
+    <div class="col-auto">
+        <a href="add_item.php" class="btn btn-primary"><i class="fas fa-plus"></i> Add Item</a>
+    </div>
+    <?php endif; ?>
+    <div class="col-auto">
+        <a href="create_receipt.php" class="btn btn-success"><i class="fas fa-file-invoice"></i> New Receipt</a>
+    </div>
+    <div class="col-auto">
+        <a href="import_export.php" class="btn btn-outline-secondary"><i class="fas fa-file-import"></i> Import/Export</a>
+    </div>
+    <?php if (is_admin()): ?>
+    <div class="col-auto">
+        <a href="users.php" class="btn btn-outline-warning"><i class="fas fa-user-shield"></i> Manage Users</a>
+    </div>
+    <?php endif; ?>
+    <div class="col-auto ms-auto">
+        <a href="inventory.php" class="btn btn-outline-primary"><i class="fas fa-box"></i> View Inventory</a>
+    </div>
+    
+</div>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card shadow mb-4">
@@ -100,8 +144,8 @@ if (is_admin()) {
                 <h6 class="m-0 font-weight-bold text-primary">Recent Receipts</h6>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm" width="100%" cellspacing="0">
+                <div class="table-responsive table-sticky">
+                    <table class="table table-hover table-compact align-middle" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th>Receipt #</th>
@@ -116,10 +160,15 @@ if (is_admin()) {
                             while ($row = $stmt->fetch()):
                             ?>
                             <tr>
-                                <td><a href="<?php echo BASE_URL; ?>view_receipt.php?id=<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['receipt_number']); ?></a></td>
+                                <td>
+                                    <a href="<?php echo BASE_URL; ?>view_receipt.php?id=<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['receipt_number']); ?></a>
+                                    <span class="row-actions ms-2">
+                                        <a class="btn btn-sm btn-light" href="<?php echo BASE_URL; ?>view_receipt.php?id=<?php echo $row['id']; ?>" title="View"><i class="fas fa-eye"></i></a>
+                                    </span>
+                                </td>
                                 <td><?php echo ucfirst($row['type']); ?></td>
                                 <td><?php echo date('Y-m-d', strtotime($row['receipt_date'])); ?></td>
-                                <td><?php echo number_format($row['total_amount'], 2); ?></td>
+                                <td>₦<?php echo number_format($row['total_amount'], 2); ?></td>
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
