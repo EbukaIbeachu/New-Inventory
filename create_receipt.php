@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $pdo->commit();
+            log_activity('create_receipt', 'Created receipt ' . $receipt_number . ' (ID ' . $receipt_id . ') type ' . $type . ' total ' . $total_amount);
             flash('main_flash', 'Receipt created successfully!');
             redirect('receipts.php');
 

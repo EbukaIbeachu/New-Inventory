@@ -14,9 +14,12 @@
         </a>
         
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-        <a href="<?php echo BASE_URL; ?>users.php" class="list-group-item list-group-item-action bg-dark text-white p-3">
-            <i class="fas fa-users me-2"></i> Users
-        </a>
+            <a href="<?php echo BASE_URL; ?>users.php" class="list-group-item list-group-item-action bg-dark text-white p-3">
+                <i class="fas fa-users me-2"></i> Users
+            </a>
+            <a href="<?php echo BASE_URL; ?>activity_log.php" class="list-group-item list-group-item-action bg-dark text-white p-3">
+                <i class="fas fa-clipboard-list me-2"></i> Activity Log
+            </a>
         <a href="<?php echo BASE_URL; ?>automation.php" class="list-group-item list-group-item-action bg-dark text-white p-3">
             <i class="fas fa-cogs me-2"></i> Automation
         </a>

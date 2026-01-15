@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("INSERT INTO inventory (name, sku, category, quantity, unit_price, location, barcode_data, description, low_stock_threshold, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$name, $sku, $category, $quantity, $price, $location, $barcode, $description, $low_stock, $image_path]);
+        $itemId = (int)$pdo->lastInsertId();
+        log_activity('add_item', 'Added item ID ' . $itemId . ' (' . $name . ')');
         flash('main_flash', 'Item added successfully!');
         redirect('inventory.php');
     } catch (PDOException $e) {

@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("UPDATE inventory SET name=?, sku=?, category=?, quantity=?, unit_price=?, location=?, barcode_data=?, description=?, low_stock_threshold=?, image_path=? WHERE id=?");
         $stmt->execute([$name, $sku, $category, $quantity, $price, $location, $barcode, $description, $low_stock, $image_path, $id]);
+        log_activity('edit_item', 'Edited item ID ' . $id . ' (' . $name . ')');
         flash('main_flash', 'Item updated successfully!');
         redirect('inventory.php');
     } catch (PDOException $e) {

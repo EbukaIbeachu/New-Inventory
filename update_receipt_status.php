@@ -16,5 +16,8 @@ if (!$id || !in_array($status, ['Paid', 'Unpaid', 'Overdue'])) {
 
 $stmt = $pdo->prepare("UPDATE receipts SET status = ? WHERE id = ?");
 $success = $stmt->execute([$status, $id]);
+if ($success) {
+    log_activity('update_receipt_status', 'Updated receipt ID ' . $id . ' to status ' . $status);
+}
 
 echo json_encode(['success' => $success]);

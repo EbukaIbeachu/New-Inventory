@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_role'] = $user['role'];
+            // Activity log
+            log_activity('login', 'User logged in successfully', (int)$user['id']);
             redirect('index.php');
         } elseif ($user['status'] === 'pending') {
             $error = "Your account is pending approval.";

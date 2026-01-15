@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, role, status) VALUES (?, ?, ?, 'admin', 'approved')");
             if ($stmt->execute([$username, $email, $hashed_password])) {
+                log_activity('register_admin', 'Initial admin registered with username ' . $username);
                 $success = "Admin registration successful! You can now <a href='login.php'>login</a>.";
             } else {
                 $error = "Registration failed. Please try again.";

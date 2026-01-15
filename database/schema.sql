@@ -70,6 +70,18 @@ CREATE TABLE IF NOT EXISTS settings (
     setting_value TEXT
 );
 
+-- Activity Log Table
+CREATE TABLE IF NOT EXISTS activity_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    description TEXT,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- Insert Default Admin (Password: admin123)
 -- Hash: $2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
 INSERT INTO users (username, email, password_hash, role, status) 

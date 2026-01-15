@@ -20,7 +20,8 @@ if (isset($_GET['id'])) {
         
         $stmt = $pdo->prepare("DELETE FROM inventory WHERE id = ?");
         $stmt->execute([$id]);
-        
+        log_activity('delete_item', 'Deleted item ID ' . $id);
+
         flash('main_flash', 'Item deleted successfully.');
     }
 }

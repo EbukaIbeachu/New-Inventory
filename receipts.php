@@ -62,9 +62,10 @@ include __DIR__ . '/includes/header.php';
                         </td>
                         <td><?php echo number_format($row['total_amount'], 2); ?></td>
                         <td>
-                            <a href="view_receipt.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-info text-white"><i class="fas fa-eye"></i></a>
-                            <a href="view_receipt.php?id=<?php echo $row['id']; ?>&print=true" target="_blank" class="btn btn-sm btn-secondary"><i class="fas fa-print"></i></a>
-                            <a href="delete_receipt.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger ms-1" onclick="return confirm('Are you sure you want to delete this receipt? This will restore inventory quantities.');"><i class="fas fa-trash"></i></a>
+                            <a href="view_receipt.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-info text-white" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="view_receipt.php?id=<?php echo $row['id']; ?>&print=true" target="_blank" class="btn btn-sm btn-secondary" title="Print"><i class="fas fa-print"></i></a>
+                            <a href="view_receipt.php?id=<?php echo $row['id']; ?>&download=1" class="btn btn-sm btn-outline-secondary" title="Download"><i class="fas fa-download"></i></a>
+                            <a href="delete_receipt.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger ms-1" onclick="return confirm('Are you sure you want to delete this receipt? This will restore inventory quantities.');" title="Delete"><i class="fas fa-trash"></i></a>
                         </td>
                     </tr>
                     <?php endwhile; ?>

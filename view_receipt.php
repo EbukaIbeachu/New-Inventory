@@ -11,6 +11,7 @@ if (!isset($_GET['id'])) {
 
 $id = (int)$_GET['id'];
 $is_print = isset($_GET['print']);
+$is_download = isset($_GET['download']);
 
 // Fetch Receipt
 $stmt = $pdo->prepare("SELECT r.*, u.username FROM receipts r JOIN users u ON r.created_by = u.id WHERE r.id = ?");
@@ -26,7 +27,10 @@ $stmt = $pdo->prepare("SELECT ri.*, i.name, i.sku FROM receipt_items ri JOIN inv
 $stmt->execute([$id]);
 $items = $stmt->fetchAll();
 
-if ($is_print) {
+if ($is_print || $is_download) {
+    // Capture the existing print HTML into a buffer so we can either
+    // echo it (for print) or feed it to a PDF generator for download.
+    ob_start();
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -52,7 +56,7 @@ if ($is_print) {
             }
         </style>
     </head>
-    <body onload="window.print()">
+    <body<?php echo $is_print && !$is_download ? ' onload="window.print()"' : ''; ?>>
         <div class="container">
             <div class="row mb-4 doc-header">
                 <div class="col-6">
@@ -115,6 +119,38 @@ if ($is_print) {
     </body>
     </html>
     <?php
+    $html = ob_get_clean();
+
+    if ($is_download) {
+        $generated = false;
+        $autoload = __DIR__ . '/vendor/autoload.php';
+        if (file_exists($autoload)) {
+            require_once $autoload;
+            if (class_exists('Dompdf\\Dompdf')) {
+                $dompdf = new \Dompdf\Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.pdf';
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="' . $filename . '"');
+                echo $dompdf->output();
+                $generated = true;
+            }
+        }
+
+        if (!$generated) {
+            // Fallback to HTML download if Dompdf isn't installed
+            $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.html';
+            header('Content-Type: text/html; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            echo $html;
+        }
+    } else {
+        // Normal print view
+        echo $html;
+    }
+
     exit();
 }
 
@@ -126,6 +162,7 @@ include __DIR__ . '/includes/header.php';
     <div>
         <a href="receipts.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
         <a href="view_receipt.php?id=<?php echo $id; ?>&print=true" target="_blank" class="btn btn-primary"><i class="fas fa-print"></i> Print</a>
+        <a href="view_receipt.php?id=<?php echo $id; ?>&download=1" class="btn btn-outline-secondary"><i class="fas fa-download"></i> Download</a>
     </div>
 </div>
 

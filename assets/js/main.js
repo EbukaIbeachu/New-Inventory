@@ -219,4 +219,79 @@ $(document).ready(function() {
         var target = $(this).data('target');
         $(target).toggleClass('no-print');
     });
+
+    // Guided tour (Intro.js)
+    function buildTourSteps() {
+        var steps = [];
+        if ($('#sidebar-wrapper').length) {
+            steps.push({
+                element: document.getElementById('sidebar-wrapper'),
+                intro: 'Use this sidebar to navigate between Dashboard, Inventory, Receipts, Users and more.',
+                position: 'right'
+            });
+        }
+        if ($('#page-content-wrapper').length) {
+            steps.push({
+                element: document.getElementById('page-content-wrapper'),
+                intro: 'This area shows the main content for the page you are on.',
+                position: 'bottom'
+            });
+        }
+        var $datatable = $('.datatable').first();
+        if ($datatable.length) {
+            steps.push({
+                element: $datatable.get(0),
+                intro: 'Tables support search, sorting and pagination. Use the toolbar above to filter and change density.',
+                position: 'top'
+            });
+        }
+        var $createReceipt = $("a[href*='create_receipt.php']").first();
+        if ($createReceipt.length) {
+            steps.push({
+                element: $createReceipt.get(0),
+                intro: 'Create a new receipt from here. Items and customers are recorded against each receipt.',
+                position: 'bottom'
+            });
+        }
+        var $viewReceipt = $("a[href*='view_receipt.php?id=']").first();
+        if ($viewReceipt.length) {
+            steps.push({
+                element: $viewReceipt.get(0),
+                intro: 'Click on a receipt to see full details, update status, and print.',
+                position: 'bottom'
+            });
+        }
+        return steps;
+    }
+
+    function startAppTour(force) {
+        if (typeof introJs === 'undefined') return; // library not loaded
+        if (!force && localStorage.getItem('inventory_tour_seen') === '1') return;
+        var steps = buildTourSteps();
+        if (!steps.length) return;
+        var intro = introJs();
+        intro.setOptions({
+            steps: steps,
+            showProgress: true,
+            exitOnOverlayClick: true,
+            nextLabel: 'Next',
+            prevLabel: 'Back',
+            skipLabel: 'Skip',
+            doneLabel: 'Done'
+        });
+        intro.oncomplete(function(){ localStorage.setItem('inventory_tour_seen', '1'); });
+        intro.onexit(function(){ localStorage.setItem('inventory_tour_seen', '1'); });
+        intro.start();
+    }
+
+    // Start tour when user clicks the Tour button
+    $(document).on('click', '#startTour', function() {
+        // allow replay: ignore stored flag when user explicitly clicks
+        startAppTour(true);
+    });
+
+    // Optionally run once for new users on dashboard
+    if (window.location.pathname.indexOf('index.php') !== -1) {
+        startAppTour(false);
+    }
 });

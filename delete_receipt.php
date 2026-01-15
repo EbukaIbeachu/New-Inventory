@@ -30,4 +30,6 @@ $stmt->execute([$id]);
 $stmt = $pdo->prepare("DELETE FROM receipts WHERE id = ?");
 $stmt->execute([$id]);
 
+log_activity('delete_receipt', 'Deleted receipt ID ' . $id);
+
 redirect('receipts.php');

@@ -9,6 +9,8 @@
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Intro.js for guided tour -->
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
     <!-- Custom JS -->
     <script src="<?php echo BASE_URL; ?>assets/js/main.js"></script>
     <!-- UI/UX helpers -->

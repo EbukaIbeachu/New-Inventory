@@ -20,18 +20,22 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         if ($action === 'approve') {
             $stmt = $pdo->prepare("UPDATE users SET status = 'approved' WHERE id = ?");
             $stmt->execute([$user_id]);
+            log_activity('user_approve', 'Approved user ID ' . $user_id);
             $message = "User approved.";
         } elseif ($action === 'reject') {
             $stmt = $pdo->prepare("UPDATE users SET status = 'rejected' WHERE id = ?");
             $stmt->execute([$user_id]);
+            log_activity('user_reject', 'Rejected user ID ' . $user_id);
             $message = "User rejected.";
         } elseif ($action === 'make_admin') {
             $stmt = $pdo->prepare("UPDATE users SET role = 'admin' WHERE id = ?");
             $stmt->execute([$user_id]);
+            log_activity('user_make_admin', 'Promoted user ID ' . $user_id . ' to admin');
             $message = "User promoted to Admin.";
         } elseif ($action === 'revoke_admin') {
             $stmt = $pdo->prepare("UPDATE users SET role = 'user' WHERE id = ?");
             $stmt->execute([$user_id]);
+            log_activity('user_revoke_admin', 'Demoted user ID ' . $user_id . ' to user');
             $message = "User demoted to User.";
         }
     }

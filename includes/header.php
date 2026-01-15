@@ -25,6 +25,8 @@ if (!headers_sent()) {
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Intro.js CSS for guided tour -->
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
 </head>
 <body>
     <div class="d-flex" id="wrapper">
