@@ -15,6 +15,7 @@ $inventory_items = $stmt->fetchAll();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $type = $_POST['type'];
     $customer_name = clean_input($_POST['customer_name']);
+    $customer_phone = clean_input($_POST['customer_phone']);
     $status = clean_input($_POST['status']);
     $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
     $items = $_POST['items']; // Array of item ids
@@ -35,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Create Receipt
             $receipt_number = 'REC-' . strtoupper(uniqid());
-            $stmt = $pdo->prepare("INSERT INTO receipts (receipt_number, type, total_amount, customer_name, status, due_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$receipt_number, $type, $total_amount, $customer_name, $status, $due_date, $_SESSION['user_id']]);
+            $stmt = $pdo->prepare("INSERT INTO receipts (receipt_number, type, total_amount, customer_name, customer_phone, status, due_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$receipt_number, $type, $total_amount, $customer_name, $customer_phone, $status, $due_date, $_SESSION['user_id']]);
             $receipt_id = $pdo->lastInsertId();
 
             // Process Items
@@ -92,8 +93,12 @@ include 'includes/header.php';
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label">Customer / Supplier Name</label>
+                    <label class="form-label">Customer Name</label>
                     <input type="text" name="customer_name" class="form-control" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Customer Phone</label>
+                    <input type="text" name="customer_phone" class="form-control" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Status</label>

@@ -56,8 +56,8 @@ if ($is_print) {
         <div class="container">
             <div class="row mb-4 doc-header">
                 <div class="col-6">
-                    <h2><?php echo APP_NAME; ?></h2>
-                    <p>Address Line 1<br>City, Country<br>Email: support@example.com</p>
+                    <h2>Kings Trading Company</h2>
+                    <p>Plaza B70 APT Imj Trade Fair Shopping Complex Badagry Expressway<br>Email: Kingstrading19@gmail.com<br>Phone Number : 08034734000</p>
                 </div>
                 <div class="col-6 text-end">
                     <h3>RECEIPT</h3>
@@ -71,7 +71,8 @@ if ($is_print) {
             <div class="row mb-4">
                 <div class="col-6">
                     <strong>Bill To:</strong><br>
-                    <?php echo htmlspecialchars($receipt['customer_name']); ?>
+                    <?php echo htmlspecialchars($receipt['customer_name']); ?><br>
+                    <small class="text-muted"><?php echo htmlspecialchars($receipt['customer_phone']); ?></small>
                 </div>
                 <div class="col-6 text-end">
                     <strong>Type:</strong> <?php echo ucfirst($receipt['type']); ?>
@@ -134,13 +135,16 @@ include __DIR__ . '/includes/header.php';
             <div class="col-md-6">
                 <h5>Details</h5>
                 <p><strong>Date:</strong> <?php echo date('Y-m-d H:i', strtotime($receipt['receipt_date'])); ?></p>
-                <p><strong>Customer/Supplier:</strong> <?php echo htmlspecialchars($receipt['customer_name']); ?></p>
+                <p><strong>Customer & Phone:</strong> <?php echo htmlspecialchars($receipt['customer_name']); ?> <br><small class="text-muted"> <?php echo htmlspecialchars($receipt['customer_phone']); ?> </small></p>
                 <p><strong>Type:</strong> <span class="badge <?php echo $receipt['type'] === 'inbound' ? 'bg-success' : 'bg-warning text-dark'; ?>"><?php echo ucfirst($receipt['type']); ?></span></p>
                 <p><strong>Created By:</strong> <?php echo htmlspecialchars($receipt['username']); ?></p>
                 <p><strong>Status:</strong> 
-                    <span class="badge <?php echo $receipt['status'] === 'paid' ? 'bg-success' : ($receipt['status'] === 'overdue' ? 'bg-danger' : 'bg-warning'); ?>">
-                        <?php echo ucfirst($receipt['status']); ?>
-                    </span>
+                    <select class="form-select form-select-sm w-auto d-inline receipt-status-dropdown" data-id="<?php echo $receipt['id']; ?>">
+                        <option value="Paid" <?php if(strtolower($receipt['status'])=='paid') echo 'selected'; ?>>Paid</option>
+                        <option value="Unpaid" <?php if(strtolower($receipt['status'])=='unpaid') echo 'selected'; ?>>Unpaid</option>
+                        <option value="Overdue" <?php if(strtolower($receipt['status'])=='overdue') echo 'selected'; ?>>Overdue</option>
+                    </select>
+                    <span id="receipt-status-msg" class="ms-2"></span>
                 </p>
                 <?php if($receipt['due_date']): ?>
                 <p><strong>Due Date:</strong> <?php echo $receipt['due_date']; ?></p>
@@ -153,7 +157,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         
-        <table class="table table-hover table-compact table-bordered">
+        <table class="table table-hover table-compact table-bordered table-sm">
             <thead>
                 <tr>
                     <th>Item</th>
@@ -183,5 +187,93 @@ include __DIR__ . '/includes/header.php';
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var dropdown = document.querySelector('.receipt-status-dropdown');
+    if (dropdown) {
+        dropdown.addEventListener('change', function() {
+            var receiptId = this.getAttribute('data-id');
+            var newStatus = this.value;
+            var selectElem = this;
+            var msgElem = document.getElementById('receipt-status-msg');
+            selectElem.disabled = true;
+            fetch('update_receipt_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + encodeURIComponent(receiptId) + '&status=' + encodeURIComponent(newStatus)
+            })
+            .then(response => response.json())
+            .then(data => {
+                selectElem.disabled = false;
+                if (data.success) {
+                    msgElem.textContent = 'Status updated.';
+                    msgElem.className = 'text-success ms-2';
+                } else {
+                    msgElem.textContent = 'Failed to update.';
+                    msgElem.className = 'text-danger ms-2';
+                }
+                setTimeout(function(){ msgElem.textContent = ''; }, 2000);
+            })
+            .catch(() => {
+                selectElem.disabled = false;
+                msgElem.textContent = 'Error updating status.';
+                msgElem.className = 'text-danger ms-2';
+                setTimeout(function(){ msgElem.textContent = ''; }, 2000);
+            });
+        });
+    }
+});
+</script>
+
+
+<style>
+@media (max-width: 576px) {
+    .table-responsive, .table {
+        font-size: 0.95rem;
+    }
+    .table th, .table td {
+        padding: 0.4rem 0.3rem;
+        white-space: normal;
+    }
+    .btn {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.5rem;
+    }
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.3em 0.5em;
+    }
+    .doc-header h2, .doc-header h3 {
+        font-size: 1.1rem;
+    }
+    /* Hide less important columns on mobile */
+    .table th:nth-child(2), .table td:nth-child(2), /* SKU */
+    .table th:nth-child(4), .table td:nth-child(4)  /* Unit Price */
+    {
+        display: none;
+    }
+    /* Stack table rows as cards */
+    .table-bordered > tbody > tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .table-bordered > tbody > tr > td {
+        display: block;
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .table-bordered > tbody > tr > td:last-child {
+        border-bottom: none;
+    }
+    .table-bordered > thead {
+        display: none;
+    }
+}
+</style>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

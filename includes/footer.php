@@ -11,12 +11,19 @@
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
     <!-- Custom JS -->
     <script src="<?php echo BASE_URL; ?>assets/js/main.js"></script>
-    
+    <!-- UI/UX helpers -->
     <script>
-        $("#sidebarToggle").click(function(e) {
-            e.preventDefault();
-            $("#wrapper").toggleClass("toggled");
-        });
+    // Sidebar toggle
+    $("#sidebarToggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+    // Tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     </script>
 </body>
 </html>

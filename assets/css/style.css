@@ -59,6 +59,12 @@ table tbody tr:hover .row-actions { opacity: 1; }
     tfoot { display: table-footer-group; }
 }
 
+/* Character counters */
+.char-count {
+    font-size: 0.775rem;
+    color: #6c757d;
+}
+
 #sidebar-wrapper .sidebar-heading {
     padding: 0.875rem 1.25rem;
     font-size: 1.2rem;
