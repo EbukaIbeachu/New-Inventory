@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Africa/Lagos'); // Set application timezone
 // Database Configuration for InfinityFree
 // Host, name, user and password from your InfinityFree control panel
 define('DB_HOST', 'sql113.infinity.com');

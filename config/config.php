@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Africa/Lagos'); // Set application timezone
 // Database Configuration (read from environment with safe defaults)
 $__env_db_host = getenv('DB_HOST');
 $__env_db_name = getenv('DB_NAME');

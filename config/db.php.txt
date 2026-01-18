@@ -10,6 +10,12 @@ try {
     ];
 
     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    // Ensure MySQL session uses Africa/Lagos time (UTC+1) so CURRENT_TIMESTAMP etc. match PHP
+    try {
+        $pdo->exec("SET time_zone = '+01:00'");
+    } catch (PDOException $tzEx) {
+        error_log('Failed to set MySQL time_zone: ' . $tzEx->getMessage());
+    }
 
 } catch (PDOException $e) {
     error_log('DB connect failed: ' . $e->getMessage());

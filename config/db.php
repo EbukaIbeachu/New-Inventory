@@ -9,6 +9,13 @@ try {
         PDO::ATTR_EMULATE_PREPARES   => false,
     ];
     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    // Ensure MySQL session uses Africa/Lagos time (UTC+1) so CURRENT_TIMESTAMP etc. match PHP
+    try {
+        $pdo->exec("SET time_zone = '+01:00'");
+    } catch (\PDOException $tzEx) {
+        // If setting time zone fails, log but don't break the app
+        error_log('Failed to set MySQL time_zone: ' . $tzEx->getMessage());
+    }
 } catch (\PDOException $e) {
     // If database doesn't exist, we might be in installation mode
     if (strpos($e->getMessage(), "Unknown database") !== false) {
@@ -16,6 +23,11 @@ try {
         try {
             $dsn_no_db = "mysql:host=" . DB_HOST . ";charset=utf8mb4";
             $pdo = new PDO($dsn_no_db, DB_USER, DB_PASS, $options);
+            try {
+                $pdo->exec("SET time_zone = '+01:00'");
+            } catch (\PDOException $tzEx) {
+                error_log('Failed to set MySQL time_zone (no DB): ' . $tzEx->getMessage());
+            }
         } catch (\PDOException $e2) {
             error_log('DB connect (no DB) failed: ' . $e2->getMessage());
             die("Database connection error. Please try again later.");

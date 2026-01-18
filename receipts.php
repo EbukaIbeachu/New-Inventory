@@ -114,9 +114,7 @@ include __DIR__ . '/includes/header.php';
         padding: 0.3em 0.5em;
     }
     /* Hide less important columns on mobile */
-    .table th:nth-child(2), .table td:nth-child(2), /* Type */
-    .table th:nth-child(5), .table td:nth-child(5), /* Status */
-    .table th:nth-child(7), .table td:nth-child(7)  /* Actions */
+    .table th:nth-child(2), .table td:nth-child(2) /* Type */
     {
         display: none;
     }
