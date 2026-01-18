@@ -4,6 +4,7 @@
 
 #sidebar-wrapper {
     min-height: 100vh;
+    padding-top: 56px; /* match fixed navbar height so heading is not covered */
     margin-left: -250px;
     -webkit-transition: margin .25s ease-out;
     -moz-transition: margin .25s ease-out;
@@ -11,7 +12,7 @@
     transition: margin .25s ease-out;
 }
 
-# KPI cards and trends
+/* KPI cards and trends */
 .kpi-trend {
     font-size: 0.85rem;
     display: inline-flex;
@@ -87,4 +88,18 @@ table tbody tr:hover .row-actions { opacity: 1; }
     #wrapper.toggled #sidebar-wrapper {
         margin-left: -250px;
     }
+}
+
+/* Keep top navigation visible while scrolling */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+}
+
+/* Offset main content so it isn't hidden behind fixed navbar */
+#page-content-wrapper {
+    padding-top: 56px; /* adjust if your navbar height changes */
 }
