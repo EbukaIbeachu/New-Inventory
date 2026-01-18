@@ -55,6 +55,50 @@ SetEnv CRON_SECRET secret_cron_key
 ```
 Then restart Apache.
 
+## Access URLs
+
+Replace `localhost/inventory` with your actual base URL if different.
+
+**Public pages**
+
+- App root (redirects to login if not authenticated):  
+  http://localhost/inventory/
+- Login:  
+  http://localhost/inventory/login.php
+- Register (standard user):  
+  http://localhost/inventory/register.php
+- Initial Admin Registration (first-time setup only):  
+  http://localhost/inventory/register_admin.php
+- Forgot Password:  
+  http://localhost/inventory/forgot_password.php
+- Reset Password (opened from email link):  
+  http://localhost/inventory/reset_password.php?token=YOUR_TOKEN_HERE
+- Installer (first-time DB setup):  
+  http://localhost/inventory/install.php
+
+**Authenticated pages**
+
+- Dashboard:  
+  http://localhost/inventory/index.php
+- Inventory list & management:  
+  http://localhost/inventory/inventory.php
+- Receipts list:  
+  http://localhost/inventory/receipts.php
+- Create Receipt:  
+  http://localhost/inventory/create_receipt.php
+- View Receipt (example with ID):  
+  http://localhost/inventory/view_receipt.php?id=1
+- Users (Admin only):  
+  http://localhost/inventory/users.php
+- Activity Log (Admin only):  
+  http://localhost/inventory/activity_log.php
+- Automation settings (Admin only):  
+  http://localhost/inventory/automation.php
+- Profile:  
+  http://localhost/inventory/profile.php
+- Logout:  
+  http://localhost/inventory/logout.php
+
 ## Usage
 
 - **Login**: Use the default admin credentials to log in.

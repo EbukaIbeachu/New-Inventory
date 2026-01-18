@@ -1,0 +1,50 @@
+You are GitHub Copilot (GPT-5.1) helping me modify a PHP inventory and receipt management system deployed from the `inventory/` folder. The stack is PHP + MySQL with PDO, Bootstrap, and Dompdf. The project has config in `config/config.php`, DB connection in `config/db.php`, helpers in `includes/functions.php`, receipt views in `view_receipt.php`, and settings in the `settings` table (see `database/schema.sql`).
+
+Goal:
+Make the system easy to monetise and reuse for different businesses by removing hard-coded company-specific values and turning them into configurable settings, without breaking any existing functionality.
+
+Requirements:
+1. Company & branding settings
+   - Move all hard-coded company details out of the code and into settings or configuration, including at least:
+     - Company name (currently "Kings Trading Company").
+     - Company address (full address string used on receipts).
+     - Company email (currently `Kingstrading19@gmail.com`).
+     - Company phone number (currently `08034734000`).
+     - Receipt title/label (e.g. "RECEIPT", but some clients may want "INVOICE").
+     - Receipt footer text (e.g. "Thank you for your business!").
+   - Use the existing `settings` table where possible, with clear keys like:
+     - `company_name`, `company_address`, `company_email`, `company_phone`, `receipt_title`, `receipt_footer`.
+   - Update `view_receipt.php` (both on-screen view and PDF/print templates) to read these values from the settings instead of hard-coded strings.
+
+2. Currency and formatting
+   - Make the currency symbol configurable via the `settings` table (e.g. key `currency_symbol`), defaulting to `₦` if not set.
+   - Replace any hard-coded `₦` in views (dashboard, receipts, inventory, etc.) with the configured currency symbol.
+   - Ensure number_format usage remains the same; only the symbol should be dynamic.
+
+3. Admin UI to edit settings
+   - Add a simple "Company Profile" or "System Settings" page, accessible only to admins from the sidebar or existing admin area.
+   - On this page, allow editing of:
+     - Company name, address, email, phone.
+     - Receipt title/label.
+     - Receipt footer text.
+     - Currency symbol.
+   - Save changes into the `settings` table, reusing any existing helper functions for settings if present, or adding a small, consistent helper.
+   - Use CSRF protection and `require_login()` / `is_admin()` checks consistent with the rest of the app.
+
+4. Preserve existing behaviour
+   - Do NOT change authentication, authorisation, inventory, receipts, or activity log logic beyond what is needed to read the new settings.
+   - Keep all existing URLs, page names, and core flows intact.
+   - Ensure that if settings are missing, the system still works using sensible defaults (current hard-coded values as fallbacks).
+
+5. Documentation
+   - Update README or `config/credentials-summary.txt` with a short section describing:
+     - That company details and currency are now configurable via the new admin settings page.
+     - Which settings keys are used.
+
+Implementation expectations:
+- Use small, focused changes that fit the current coding style.
+- Prefer reusing existing helpers and patterns from `includes/functions.php`.
+- After changes, verify that:
+  - Receipts still render and download as PDF correctly.
+  - The dashboard and inventory pages still show values correctly, now using the configurable currency symbol.
+  - Non-admin users cannot access or change settings.

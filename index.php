@@ -36,6 +36,27 @@ if (is_admin()) {
     $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'");
     $pending_users = $stmt->fetchColumn();
 }
+
+// 5. Outbound sales per item (top 10)
+$sales_labels = [];
+$sales_data = [];
+try {
+    $sales_stmt = $pdo->query("SELECT i.name AS item_name, SUM(ri.quantity) AS total_qty
+        FROM receipt_items ri
+        JOIN receipts r ON r.id = ri.receipt_id
+        JOIN inventory i ON i.id = ri.inventory_id
+        WHERE r.type = 'outbound'
+        GROUP BY ri.inventory_id, i.name
+        ORDER BY total_qty DESC
+        LIMIT 10");
+    while ($row = $sales_stmt->fetch()) {
+        $sales_labels[] = $row['item_name'];
+        $sales_data[] = (int)$row['total_qty'];
+    }
+} catch (Exception $e) {
+    $sales_labels = [];
+    $sales_data = [];
+}
 ?>
 
 <div class="row mb-4">
@@ -49,7 +70,9 @@ if (is_admin()) {
                     </div>
                     <i class="fas fa-boxes fa-2x opacity-50"></i>
                 </div>
-                <small>Value: ₦<?php echo number_format($inv_stats['value'], 2); ?></small>
+                <?php if (is_admin()): ?>
+                    <small>Value: ₦<?php echo number_format($inv_stats['value'], 2); ?></small>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -202,5 +225,61 @@ if (is_admin()) {
         </div>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Outbound Items Sold (Top 10)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="outboundSalesChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function() {
+    var labels = <?php echo json_encode($sales_labels); ?>;
+    var data = <?php echo json_encode($sales_data); ?>;
+    var canvas = document.getElementById('outboundSalesChart');
+    if (!canvas) return;
+
+    if (!labels.length) {
+        canvas.parentNode.innerHTML = '<p class="text-muted mb-0">No outbound sales data available yet.</p>';
+        return;
+    }
+
+    var ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Quantity Sold (Outbound)',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+})();
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

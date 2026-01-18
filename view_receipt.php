@@ -27,135 +27,19 @@ $stmt = $pdo->prepare("SELECT ri.*, i.name, i.sku FROM receipt_items ri JOIN inv
 $stmt->execute([$id]);
 $items = $stmt->fetchAll();
 
-if ($is_print || $is_download) {
-    // Capture the existing print HTML into a buffer so we can either
-    // echo it (for print) or feed it to a PDF generator for download.
+// Ensure we have a usable grand total for display: if the stored total_amount is
+// missing or zero but there are items, sum quantity * unit_price from items.
+if ((!isset($receipt['total_amount']) || (float)$receipt['total_amount'] <= 0) && !empty($items)) {
+    $computedTotal = 0;
+    foreach ($items as $item) {
+        $computedTotal += $item['quantity'] * $item['unit_price'];
+    }
+    $receipt['total_amount'] = $computedTotal;
+}
+// Helper: render the normal view layout (used for on-screen web view)
+function get_receipt_view_html(array $receipt, array $items, int $id): string {
     ob_start();
     ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Print Receipt - <?php echo $receipt['receipt_number']; ?></title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-        <style>
-            body { padding: 20px; font-size: 12pt; }
-            .doc-header h2 { margin-bottom: .25rem; }
-            .doc-header p { margin: 0; color: #6c757d; }
-            .table th, .table td { vertical-align: middle; }
-            .totals-row th { background: #f8f9fa; }
-            @media print {
-                .no-print { display: none !important; }
-                @page { margin: 12mm; }
-                body { padding: 0; }
-                thead { display: table-header-group; }
-                tfoot { display: table-footer-group; }
-                table { page-break-inside: auto; }
-                tr, td, th { page-break-inside: avoid; page-break-after: auto; }
-            }
-        </style>
-    </head>
-    <body<?php echo $is_print && !$is_download ? ' onload="window.print()"' : ''; ?>>
-        <div class="container">
-            <div class="row mb-4 doc-header">
-                <div class="col-6">
-                    <h2>Kings Trading Company</h2>
-                    <p>Plaza B70 APT Imj Trade Fair Shopping Complex Badagry Expressway<br>Email: Kingstrading19@gmail.com<br>Phone Number : 08034734000</p>
-                </div>
-                <div class="col-6 text-end">
-                    <h3>RECEIPT</h3>
-                    <p><strong>#<?php echo $receipt['receipt_number']; ?></strong></p>
-                    <svg id="barcode"></svg>
-                    <script>JsBarcode("#barcode", "<?php echo $receipt['receipt_number']; ?>", {height: 40, displayValue: false});</script>
-                    <p>Date: <?php echo date('Y-m-d', strtotime($receipt['receipt_date'])); ?></p>
-                </div>
-            </div>
-            
-            <div class="row mb-4">
-                <div class="col-6">
-                    <strong>Bill To:</strong><br>
-                    <?php echo htmlspecialchars($receipt['customer_name']); ?><br>
-                    <small class="text-muted"><?php echo htmlspecialchars($receipt['customer_phone']); ?></small>
-                </div>
-                <div class="col-6 text-end">
-                    <strong>Type:</strong> <?php echo ucfirst($receipt['type']); ?>
-                </div>
-            </div>
-            
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>SKU</th>
-                        <th>Qty</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($items as $item): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($item['name']); ?></td>
-                        <td><?php echo htmlspecialchars($item['sku']); ?></td>
-                        <td><?php echo $item['quantity']; ?></td>
-                        <td>₦<?php echo number_format($item['unit_price'], 2); ?></td>
-                        <td>₦<?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th colspan="4" class="text-end totals-row">Grand Total</th>
-                        <th class="totals-row">₦<?php echo number_format($receipt['total_amount'], 2); ?></th>
-                    </tr>
-                </tfoot>
-            </table>
-            
-            <div class="mt-5 text-center">
-                <p>Thank you for your business!</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    <?php
-    $html = ob_get_clean();
-
-    if ($is_download) {
-        $generated = false;
-        $autoload = __DIR__ . '/vendor/autoload.php';
-        if (file_exists($autoload)) {
-            require_once $autoload;
-            if (class_exists('Dompdf\\Dompdf')) {
-                $dompdf = new \Dompdf\Dompdf();
-                $dompdf->loadHtml($html);
-                $dompdf->setPaper('A4', 'portrait');
-                $dompdf->render();
-                $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.pdf';
-                header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment; filename="' . $filename . '"');
-                echo $dompdf->output();
-                $generated = true;
-            }
-        }
-
-        if (!$generated) {
-            // Fallback to HTML download if Dompdf isn't installed
-            $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.html';
-            header('Content-Type: text/html; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            echo $html;
-        }
-    } else {
-        // Normal print view
-        echo $html;
-    }
-
-    exit();
-}
-
-include __DIR__ . '/includes/header.php';
-?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>View Receipt #<?php echo $receipt['receipt_number']; ?></h2>
@@ -224,6 +108,163 @@ include __DIR__ . '/includes/header.php';
         </table>
     </div>
 </div>
+
+    <?php
+    return ob_get_clean();
+}
+
+// Helper: render the business-style printable body (company header + items table)
+function get_receipt_print_body_html(array $receipt, array $items): string {
+    ob_start();
+    ?>
+        <div class="container">
+            <div class="row mb-4 doc-header">
+                <div class="col-6">
+                    <h2>Kings Trading Company</h2>
+                    <p>Plaza B70 APT Imj Trade Fair Shopping Complex Badagry Expressway<br>Email: Kingstrading19@gmail.com<br>Phone Number : 08034734000</p>
+                </div>
+                <div class="col-6 text-end">
+                    <h3>RECEIPT</h3>
+                    <p><strong>#<?php echo $receipt['receipt_number']; ?></strong></p>
+                    <svg id="barcode"></svg>
+                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+                    <script>JsBarcode("#barcode", "<?php echo $receipt['receipt_number']; ?>", {height: 40, displayValue: false});</script>
+                    <p>Date: <?php echo date('Y-m-d', strtotime($receipt['receipt_date'])); ?></p>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-6">
+                    <strong>Bill To:</strong><br>
+                    <?php echo htmlspecialchars($receipt['customer_name']); ?><br>
+                    <small class="text-muted"><?php echo htmlspecialchars($receipt['customer_phone']); ?></small>
+                </div>
+                <div class="col-6 text-end">
+                    <strong>Type:</strong> <?php echo ucfirst($receipt['type']); ?>
+                </div>
+            </div>
+            
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>SKU</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($items as $item): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($item['name']); ?></td>
+                        <td><?php echo htmlspecialchars($item['sku']); ?></td>
+                        <td><?php echo $item['quantity']; ?></td>
+                        <td>₦<?php echo number_format($item['unit_price'], 2); ?></td>
+                        <td>₦<?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-end totals-row">Grand Total</th>
+                        <th class="totals-row">₦<?php echo number_format($receipt['total_amount'], 2); ?></th>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="mt-5 text-center">
+                <p>Thank you for your business!</p>
+            </div>
+        </div>
+    <?php
+    return ob_get_clean();
+}
+
+// Download: use the business-style layout (no Back/Print/Download buttons or status dropdown), via Dompdf when available
+if ($is_download) {
+    $body = get_receipt_print_body_html($receipt, $items);
+
+    $style = 'body { padding: 20px; font-size: 12pt; }'
+        . '.doc-header h2 { margin-bottom: .25rem; }'
+        . '.doc-header p { margin: 0; color: #6c757d; }'
+        . '.table th, .table td { vertical-align: middle; }'
+        . '.totals-row th { background: #f8f9fa; }';
+
+    $html = '<!DOCTYPE html><html lang="en"><head>'
+        . '<meta charset="UTF-8">'
+        . '<title>Receipt ' . htmlspecialchars($receipt['receipt_number']) . '</title>'
+        . '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">'
+        . '<style>' . $style . '</style>'
+        . '</head><body>' . $body . '</body></html>';
+
+    $generated = false;
+    $autoload = __DIR__ . '/vendor/autoload.php';
+    if (file_exists($autoload)) {
+        require_once $autoload;
+        if (class_exists('Dompdf\\Dompdf')) {
+            $dompdf = new \Dompdf\Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+            $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.pdf';
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            echo $dompdf->output();
+            $generated = true;
+        }
+    }
+
+    if (!$generated) {
+        // Fallback to HTML download if Dompdf isn't installed
+        $filename = 'receipt-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $receipt['receipt_number']) . '.html';
+        header('Content-Type: text/html; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        echo $html;
+    }
+
+    exit();
+}
+
+// Print view keeps the dedicated printable template for browser printing
+if ($is_print) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Print Receipt - <?php echo $receipt['receipt_number']; ?></title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+        <style>
+            body { padding: 20px; font-size: 12pt; }
+            .doc-header h2 { margin-bottom: .25rem; }
+            .doc-header p { margin: 0; color: #6c757d; }
+            .table th, .table td { vertical-align: middle; }
+            .totals-row th { background: #f8f9fa; }
+            @media print {
+                .no-print { display: none !important; }
+                @page { margin: 12mm; }
+                body { padding: 0; }
+                thead { display: table-header-group; }
+                tfoot { display: table-footer-group; }
+                table { page-break-inside: auto; }
+                tr, td, th { page-break-inside: avoid; page-break-after: auto; }
+            }
+        </style>
+    </head>
+    <body onload="window.print()">
+        <?php echo get_receipt_print_body_html($receipt, $items); ?>
+    </body>
+    </html>
+    <?php
+    exit();
+}
+
+include __DIR__ . '/includes/header.php';
+?>
+
+<?php echo get_receipt_view_html($receipt, $items, $id); ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

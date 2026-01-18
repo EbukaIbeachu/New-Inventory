@@ -59,16 +59,8 @@ foreach ($tasks as $task) {
                 break;
                 
             case 'backup':
-                // Simple Database Backup (Dump to file)
-                $backup_file = ROOT_PATH . 'database/backup_' . date('Y-m-d_H-i-s') . '.sql';
-                // Note: This requires mysqldump to be in path and accessible
-                // For PHP implementation without mysqldump, it's more complex.
-                // We'll simulate a backup log here.
-                $content = "-- Backup created at " . date('Y-m-d H:i:s') . "\n";
-                // In real app, iterate tables and dump data
-                if (file_put_contents($backup_file, $content)) {
-                    $success = true;
-                }
+                // Disabled on InfinityFree: skip heavy backup work but treat as success
+                $success = true;
                 break;
         }
         

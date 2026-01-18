@@ -261,6 +261,14 @@ $(document).ready(function() {
                 position: 'bottom'
             });
         }
+        var $outboundChart = $('#outboundSalesChart');
+        if ($outboundChart.length) {
+            steps.push({
+                element: $outboundChart.get(0),
+                intro: 'This bar chart shows your top outbound (sold) items by quantity.',
+                position: 'top'
+            });
+        }
         return steps;
     }
 

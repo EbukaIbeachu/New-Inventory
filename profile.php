@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
                     $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
                     $stmt->execute([$new_hash, $user_id]);
+                    log_activity('change_password', 'User changed password', $user_id);
                     $message = "Password updated successfully.";
                 } else {
                     $error = "New password must be at least 6 characters.";

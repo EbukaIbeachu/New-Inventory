@@ -37,6 +37,18 @@ include __DIR__ . '/includes/header.php';
                 </thead>
                 <tbody>
                     <?php
+                    // Mark overdue outbound receipts before listing
+                    $update = $pdo->prepare("
+                        UPDATE receipts
+                        SET status = 'overdue'
+                        WHERE type = 'outbound'
+                          AND status = 'unpaid'
+                          AND due_date IS NOT NULL
+                          AND due_date < CURDATE()
+                    ");
+                    $update->execute();
+
+                    // Fetch and display receipts
                     $stmt = $pdo->query("SELECT * FROM receipts ORDER BY receipt_date DESC");
                     $receipts_found = false;
                     while ($row = $stmt->fetch()):
@@ -56,9 +68,14 @@ include __DIR__ . '/includes/header.php';
                         <td><?php echo date('Y-m-d H:i', strtotime($row['receipt_date'])); ?></td>
                         <td><?php echo htmlspecialchars($row['customer_name']); ?><br><small class="text-muted"><?php echo htmlspecialchars($row['customer_phone']); ?></small></td>
                         <td>
-                             <span class="badge <?php echo $row['status'] === 'paid' ? 'bg-success' : ($row['status'] === 'overdue' ? 'bg-danger' : 'bg-warning'); ?>">
+                            <span class="badge <?php echo $row['status'] === 'paid' ? 'bg-success' : ($row['status'] === 'overdue' ? 'bg-danger' : 'bg-warning'); ?>">
                                 <?php echo ucfirst($row['status']); ?>
                             </span>
+                            <?php
+                            $statusLower = strtolower($row['status']);
+                            if (($statusLower === 'unpaid' || $statusLower === 'overdue') && !empty($row['due_date'])): ?>
+                                <div><small class="text-muted">Due: <?php echo $row['due_date']; ?></small></div>
+                            <?php endif; ?>
                         </td>
                         <td><?php echo number_format($row['total_amount'], 2); ?></td>
                         <td>

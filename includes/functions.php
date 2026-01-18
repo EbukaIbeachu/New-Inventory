@@ -62,7 +62,7 @@ function log_activity($action_type, $description = '', $userId = null) {
     if (php_sapi_name() === 'cli') {
         return; // skip logging for CLI tasks like cron
     }
-    if (!in_array($action_type, ['login','logout','add_item','edit_item','delete_item','create_receipt','delete_receipt','update_receipt_status','user_approve','user_reject','user_make_admin','user_revoke_admin','register','register_admin'], true)) {
+    if (!in_array($action_type, ['login','logout','add_item','edit_item','delete_item','create_receipt','delete_receipt','update_receipt_status','user_approve','user_reject','user_make_admin','user_revoke_admin','register','register_admin','change_password'], true)) {
         // Allow only known types to avoid noisy logs
         $action_type = 'other';
     }
